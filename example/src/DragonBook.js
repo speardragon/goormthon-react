@@ -11,8 +11,8 @@ const REPULSE_R = 120;
 const REPULSE_S = 9;
 const SPRING_K = 0.12;
 const DAMPING = 0.75;
-const DRAG_SEGS = 18;
-const SEG_DIST = 22;
+const DRAG_SEGS = 26;
+const SEG_DIST = 18;
 
 const TEXT = `Long ago, in the age before stars had names, there lived a great dragon of emerald scales and golden eyes who made his home among the ancient libraries of the mountain realm. He was called Vermithrax the Keeper, and his breath smelled not of fire but of old parchment and forgotten ink.
 
@@ -78,101 +78,262 @@ export default function DragonBook() {
   }, []);
 
   const drawDragon = useCallback((ctx, segs) => {
-    if (!segs.length) return;
+    if (segs.length < 2) return;
+    const n = segs.length;
 
-    // Body: tail → head
-    for (let i = segs.length - 1; i >= 1; i--) {
-      const t = i / (segs.length - 1);
-      const r = 13 * (1 - t * 0.5) + 2;
+    // Perpendicular normal at segment i
+    const norm = (i) => {
+      const a = segs[Math.max(0, i - 1)];
+      const b = segs[Math.min(n - 1, i + 1)];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const len = Math.hypot(dx, dy) || 1;
+      return { x: -dy / len, y: dx / len };
+    };
+    const getR = (i) => 16 * Math.pow(1 - i / n, 0.45) + 2;
+
+    // Build ribbon edges
+    const top = segs.map((s, i) => { const nv = norm(i); const r = getR(i); return { x: s.x + nv.x * r, y: s.y + nv.y * r }; });
+    const bot = segs.map((s, i) => { const nv = norm(i); const r = getR(i); return { x: s.x - nv.x * r, y: s.y - nv.y * r }; });
+
+    // === BODY SHADOW AURA ===
+    ctx.save();
+    ctx.shadowBlur = 28;
+    ctx.shadowColor = 'rgba(200, 40, 10, 0.65)';
+
+    // Body fill
+    ctx.beginPath();
+    ctx.moveTo(top[0].x, top[0].y);
+    for (let i = 1; i < n; i++) ctx.lineTo(top[i].x, top[i].y);
+    for (let i = n - 1; i >= 0; i--) ctx.lineTo(bot[i].x, bot[i].y);
+    ctx.closePath();
+    const bodyGrd = ctx.createLinearGradient(segs[0].x, segs[0].y, segs[n - 1].x, segs[n - 1].y);
+    bodyGrd.addColorStop(0, '#c01818');
+    bodyGrd.addColorStop(0.5, '#860c0c');
+    bodyGrd.addColorStop(1, '#3e0505');
+    ctx.fillStyle = bodyGrd;
+    ctx.fill();
+    ctx.restore();
+
+    // Underbelly highlight strip
+    ctx.save();
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      const nv = norm(i); const r = getR(i) * 0.45;
+      i === 0 ? ctx.moveTo(segs[i].x + nv.x * r, segs[i].y + nv.y * r)
+              : ctx.lineTo(segs[i].x + nv.x * r, segs[i].y + nv.y * r);
+    }
+    for (let i = n - 1; i >= 0; i--) {
+      const nv = norm(i); const r = getR(i) * 0.45;
+      ctx.lineTo(segs[i].x - nv.x * r, segs[i].y - nv.y * r);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255, 140, 60, 0.18)';
+    ctx.fill();
+    ctx.restore();
+
+    // Scale texture (arcs along body)
+    for (let i = 3; i < n - 1; i += 2) {
+      const nv = norm(i); const r = getR(i);
+      const ang = Math.atan2(segs[i].y - segs[Math.max(0, i-1)].y, segs[i].x - segs[Math.max(0, i-1)].x);
+      ctx.save();
       ctx.beginPath();
-      ctx.arc(segs[i].x, segs[i].y, r, 0, Math.PI * 2);
-      ctx.fillStyle = `hsl(${120 - t * 30}, ${70 - t * 20}%, ${25 + t * 10}%)`;
-      ctx.fill();
-      // Scale highlight
-      ctx.beginPath();
-      ctx.arc(segs[i].x - r * 0.3, segs[i].y - r * 0.3, r * 0.4, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(100, 220, 60, ${0.25 * (1 - t)})`;
-      ctx.fill();
+      ctx.arc(segs[i].x, segs[i].y, r * 0.75, ang + 0.3, ang + Math.PI - 0.3);
+      ctx.strokeStyle = `rgba(180, 30, 30, ${0.5 * (1 - i / n)})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
     }
 
-    // Wings at ~30% body length
-    const wi = Math.floor(segs.length * 0.28);
+    // === DORSAL SPINES ===
+    ctx.save();
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = 'rgba(255, 120, 30, 0.6)';
+    for (let i = 2; i < n - 3; i += 3) {
+      const nv = norm(i); const r = getR(i);
+      const spLen = r * 1.4 + 3;
+      const bx = segs[i].x + nv.x * r, by = segs[i].y + nv.y * r;
+      ctx.beginPath();
+      ctx.moveTo(bx - nv.y * r * 0.25, by + nv.x * r * 0.25);
+      ctx.lineTo(bx + nv.x * spLen, by + nv.y * spLen);
+      ctx.lineTo(bx + nv.y * r * 0.25, by - nv.x * r * 0.25);
+      ctx.closePath();
+      const spGrd = ctx.createLinearGradient(bx, by, bx + nv.x * spLen, by + nv.y * spLen);
+      spGrd.addColorStop(0, `hsl(${20 - i}, 85%, 40%)`);
+      spGrd.addColorStop(1, `hsl(${40 - i}, 90%, 60%)`);
+      ctx.fillStyle = spGrd;
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // === WINGS ===
+    const wi = Math.floor(n * 0.3);
     if (segs[wi] && segs[wi + 1]) {
       const ws = segs[wi];
-      const ang = Math.atan2(ws.y - segs[wi + 1].y, ws.x - segs[wi + 1].x);
+      const wn = norm(wi);
+      const wr = getR(wi);
+      const wAng = Math.atan2(ws.y - segs[wi + 1].y, ws.x - segs[wi + 1].x);
+
       [1, -1].forEach((side) => {
-        const perp = ang + (Math.PI / 2) * side;
+        const bx = ws.x - wn.x * wr * side;
+        const by = ws.y - wn.y * wr * side;
+        const outerX = bx - wn.x * 55 * side + Math.cos(wAng + Math.PI) * 15;
+        const outerY = by - wn.y * 55 * side + Math.sin(wAng + Math.PI) * 15;
+        const fwdX = bx - wn.x * 35 * side + Math.cos(wAng) * 38;
+        const fwdY = by - wn.y * 35 * side + Math.sin(wAng) * 38;
+        const midX = (outerX + fwdX) / 2;
+        const midY = (outerY + fwdY) / 2;
+
+        ctx.save();
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = 'rgba(160, 10, 10, 0.55)';
         ctx.beginPath();
-        ctx.moveTo(ws.x + Math.cos(perp) * 8, ws.y + Math.sin(perp) * 8);
-        ctx.lineTo(
-          ws.x + Math.cos(perp) * 40 + Math.cos(ang + Math.PI) * 8,
-          ws.y + Math.sin(perp) * 40 + Math.sin(ang + Math.PI) * 8,
-        );
-        ctx.lineTo(
-          ws.x + Math.cos(perp) * 24 + Math.cos(ang) * 16,
-          ws.y + Math.sin(perp) * 24 + Math.sin(ang) * 16,
-        );
+        ctx.moveTo(bx, by);
+        ctx.quadraticCurveTo(outerX + (bx - outerX) * 0.1, outerY + (by - outerY) * 0.1, outerX, outerY);
+        ctx.quadraticCurveTo(midX, midY, fwdX, fwdY);
         ctx.closePath();
-        ctx.fillStyle = 'rgba(30, 100, 20, 0.82)';
+        const wingGrd = ctx.createRadialGradient(bx, by, 0, bx, by, 65);
+        wingGrd.addColorStop(0, 'rgba(160, 15, 15, 0.9)');
+        wingGrd.addColorStop(0.6, 'rgba(100, 8, 8, 0.75)');
+        wingGrd.addColorStop(1, 'rgba(60, 5, 5, 0.4)');
+        ctx.fillStyle = wingGrd;
         ctx.fill();
-        ctx.strokeStyle = 'rgba(80, 200, 60, 0.5)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
+        ctx.restore();
+
+        // Wing veins
+        ctx.save();
+        ctx.strokeStyle = 'rgba(220, 60, 60, 0.35)';
+        ctx.lineWidth = 0.8;
+        [[outerX, outerY], [fwdX, fwdY], [midX, midY]].forEach(([tx, ty]) => {
+          ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(tx, ty); ctx.stroke();
+        });
+        ctx.restore();
       });
     }
 
-    // Head
+    // === HEAD ===
     const h = segs[0];
-    const n = segs[1] ?? h;
-    const ha = Math.atan2(h.y - n.y, h.x - n.x);
+    const neck = segs[1] ?? h;
+    const ha = Math.atan2(h.y - neck.y, h.x - neck.x);
     const hp = ha + Math.PI / 2;
 
+    // Head glow
+    ctx.save();
+    ctx.shadowBlur = 35;
+    ctx.shadowColor = 'rgba(255, 60, 20, 0.8)';
+
+    // Skull
     ctx.beginPath();
-    ctx.arc(h.x, h.y, 15, 0, Math.PI * 2);
-    ctx.fillStyle = 'hsl(120, 68%, 22%)';
+    ctx.ellipse(h.x + Math.cos(ha) * 3, h.y + Math.sin(ha) * 3, 17, 12, ha, 0, Math.PI * 2);
+    const skullGrd = ctx.createRadialGradient(
+      h.x - Math.cos(ha) * 6, h.y - Math.sin(ha) * 6, 0,
+      h.x, h.y, 20
+    );
+    skullGrd.addColorStop(0, '#d42020');
+    skullGrd.addColorStop(1, '#6a0808');
+    ctx.fillStyle = skullGrd;
     ctx.fill();
-    ctx.strokeStyle = 'hsl(120, 80%, 48%)';
-    ctx.lineWidth = 1.5;
+
+    // Snout
+    ctx.beginPath();
+    ctx.ellipse(h.x + Math.cos(ha) * 17, h.y + Math.sin(ha) * 17, 10, 6.5, ha, 0, Math.PI * 2);
+    ctx.fillStyle = '#961010';
+    ctx.fill();
+    ctx.restore();
+
+    // Jaw line
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(h.x + Math.cos(hp) * 6, h.y + Math.sin(hp) * 6);
+    ctx.quadraticCurveTo(
+      h.x + Math.cos(ha) * 14 + Math.cos(hp) * 10,
+      h.y + Math.sin(ha) * 14 + Math.sin(hp) * 10,
+      h.x + Math.cos(ha) * 22,
+      h.y + Math.sin(ha) * 22,
+    );
+    ctx.strokeStyle = 'rgba(80, 5, 5, 0.7)';
+    ctx.lineWidth = 2.5;
     ctx.stroke();
+    ctx.restore();
 
-    // Horns
-    [1, -1].forEach((s) => {
+    // Fangs
+    ctx.save();
+    [0.35, -0.35].forEach((offset) => {
+      const fx = h.x + Math.cos(ha) * 19 + Math.cos(hp) * offset * 14;
+      const fy = h.y + Math.sin(ha) * 19 + Math.sin(hp) * offset * 14;
       ctx.beginPath();
-      ctx.moveTo(h.x + Math.cos(hp) * s * 7, h.y + Math.sin(hp) * s * 7);
-      ctx.lineTo(
-        h.x + Math.cos(ha) * 13 + Math.cos(hp) * s * 3,
-        h.y + Math.sin(ha) * 13 + Math.sin(hp) * s * 3,
-      );
-      ctx.lineTo(h.x + Math.cos(hp) * s * 3, h.y + Math.sin(hp) * s * 3);
+      ctx.moveTo(fx, fy);
+      ctx.lineTo(fx + Math.cos(hp) * offset * 2, fy + Math.sin(hp) * offset * 2);
+      ctx.lineTo(fx + Math.cos(ha) * 6, fy + Math.sin(ha) * 6);
       ctx.closePath();
-      ctx.fillStyle = 'hsl(45, 90%, 55%)';
+      ctx.fillStyle = '#f0ead0';
       ctx.fill();
     });
+    ctx.restore();
 
-    // Eyes
+    // Curved horns
+    ctx.save();
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = 'rgba(255, 190, 40, 0.7)';
     [1, -1].forEach((s) => {
-      const ex = h.x + Math.cos(hp) * s * 5 + Math.cos(ha) * 5;
-      const ey = h.y + Math.sin(hp) * s * 5 + Math.sin(ha) * 5;
+      const hbx = h.x + Math.cos(hp) * s * 9 - Math.cos(ha) * 5;
+      const hby = h.y + Math.sin(hp) * s * 9 - Math.sin(ha) * 5;
+      const htx = h.x + Math.cos(hp) * s * 5 + Math.cos(ha) * 16;
+      const hty = h.y + Math.sin(hp) * s * 5 + Math.sin(ha) * 16;
+      const hcx = h.x + Math.cos(hp) * s * 18 + Math.cos(ha) * 6;
+      const hcy = h.y + Math.sin(hp) * s * 18 + Math.sin(ha) * 6;
       ctx.beginPath();
-      ctx.arc(ex, ey, 4, 0, Math.PI * 2);
-      ctx.fillStyle = 'hsl(45, 100%, 60%)';
+      ctx.moveTo(hbx, hby);
+      ctx.quadraticCurveTo(hcx, hcy, htx, hty);
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#c89010';
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#ffd84a';
+      ctx.stroke();
+    });
+    ctx.restore();
+
+    // Glowing eyes with slit pupils
+    ctx.save();
+    ctx.shadowBlur = 18;
+    ctx.shadowColor = 'rgba(255, 210, 50, 1)';
+    [1, -1].forEach((s) => {
+      const ex = h.x + Math.cos(hp) * s * 5.5 + Math.cos(ha) * 6;
+      const ey = h.y + Math.sin(hp) * s * 5.5 + Math.sin(ha) * 6;
+      // Iris
+      ctx.beginPath();
+      ctx.ellipse(ex, ey, 5, 3.5, ha, 0, Math.PI * 2);
+      const eyeGrd = ctx.createRadialGradient(ex, ey, 0, ex, ey, 5);
+      eyeGrd.addColorStop(0, '#fff8a0');
+      eyeGrd.addColorStop(0.5, '#ffcc00');
+      eyeGrd.addColorStop(1, '#cc8800');
+      ctx.fillStyle = eyeGrd;
       ctx.fill();
+      // Slit pupil
       ctx.beginPath();
-      ctx.arc(ex + Math.cos(ha), ey + Math.sin(ha), 2, 0, Math.PI * 2);
-      ctx.fillStyle = '#000';
+      ctx.ellipse(ex + Math.cos(ha) * 0.5, ey + Math.sin(ha) * 0.5, 1.2, 3, ha + Math.PI / 2, 0, Math.PI * 2);
+      ctx.fillStyle = '#080000';
       ctx.fill();
     });
+    ctx.restore();
 
-    // Nose glow
-    const nx = h.x + Math.cos(ha) * 15;
-    const ny = h.y + Math.sin(ha) * 15;
-    const grd = ctx.createRadialGradient(nx, ny, 0, nx, ny, 8);
-    grd.addColorStop(0, 'rgba(255, 120, 0, 0.9)');
-    grd.addColorStop(1, 'rgba(255, 60, 0, 0)');
+    // Fire breath (animated-look via multi-layer radial)
+    const fireX = h.x + Math.cos(ha) * 26;
+    const fireY = h.y + Math.sin(ha) * 26;
+    const f1 = ctx.createRadialGradient(fireX, fireY, 0, fireX, fireY, 16);
+    f1.addColorStop(0, 'rgba(255, 255, 220, 0.95)');
+    f1.addColorStop(0.25, 'rgba(255, 180, 30, 0.85)');
+    f1.addColorStop(0.6, 'rgba(255, 60, 0, 0.5)');
+    f1.addColorStop(1, 'rgba(180, 10, 0, 0)');
+    ctx.save();
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = 'rgba(255, 100, 0, 0.8)';
     ctx.beginPath();
-    ctx.arc(nx, ny, 8, 0, Math.PI * 2);
-    ctx.fillStyle = grd;
+    ctx.arc(fireX, fireY, 16, 0, Math.PI * 2);
+    ctx.fillStyle = f1;
     ctx.fill();
+    ctx.restore();
   }, []);
 
   const animate = useCallback(() => {
