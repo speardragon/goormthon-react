@@ -13,16 +13,6 @@ spec:
         app: frontend
     spec:
       containers:
-<<<<<<< Updated upstream
-      - name: frontend
-        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-1/frontend:build-2
-        ports:
-        - containerPort: 3000
-        volumeMounts:
-        - name: config-volume
-          mountPath: /app/config
-          readOnly: true
-=======
         - name: frontend
           image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-1/frontend:build-2
           ports:
@@ -31,7 +21,6 @@ spec:
             - name: config-volume
               mountPath: /app/config
               readOnly: true
->>>>>>> Stashed changes
       volumes:
         - name: config-volume
           configMap:
