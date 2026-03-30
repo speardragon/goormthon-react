@@ -7,12 +7,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/config/config.json')
-      .then((res) => res.json())
-      .then((config) => {
-        const apiUrl = config.REACT_APP_API_URL;
-        return fetch(apiUrl);
-      })
+    fetch('/api')
       .then((res) => {
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}: ${res.statusText}`);
