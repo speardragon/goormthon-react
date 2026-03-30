@@ -73,10 +73,8 @@ export default function DragonBook() {
       if (pi < arr.length - 1) lineIdx += 0.7;
     });
 
-    const totalH = PAD_Y * 2 + Math.ceil(lineIdx) * LINE_HEIGHT;
-    page.style.height = `${totalH}px`;
     canvas.width = page.offsetWidth;
-    canvas.height = totalH;
+    canvas.height = page.offsetHeight;
 
     segsRef.current = Array.from({ length: DRAG_SEGS }, () => ({ x: -999, y: -999 }));
   }, []);

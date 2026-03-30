@@ -7,17 +7,19 @@
 }
 
 .book-scene {
-  min-height: 100vh;
+  height: 100vh;
   background: radial-gradient(ellipse at 50% 30%, #1e1408 0%, #0a0a0a 100%);
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 60px 20px 80px;
+  align-items: center;
+  padding: 40px 20px;
 }
 
 .book-page {
   position: relative;
   width: min(680px, 95vw);
+  height: 100%;
+  max-height: calc(100vh - 80px);
   background: #f6edd8;
   background-image:
     /* subtle paper grain */
@@ -29,7 +31,6 @@
     inset 4px 0 12px rgba(0, 0, 0, 0.06),
     inset -4px 0 12px rgba(0, 0, 0, 0.06);
   border-radius: 2px;
-  cursor: none;
   overflow: visible;
 }
 
