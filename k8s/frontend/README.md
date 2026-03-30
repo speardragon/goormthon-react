@@ -34,7 +34,7 @@ frontend/
 
 ### Ingress
 
-- 외부 접근: goormthon-3.goorm.training/\* 경로로 프론트엔드 애플리케이션 접근 가능
+- 외부 접근: goormthon-4.goorm.training/\* 경로로 프론트엔드 애플리케이션 접근 가능
 
 <br>
 
@@ -42,9 +42,9 @@ frontend/
 
 ### 1. 구름톤 팀 번호 설정
 
-다음 파일에서 `goormthon-3`를 실제 팀 번호로 변경하세요
+다음 파일에서 `goormthon-4`를 실제 팀 번호로 변경하세요
 
-> ex. goormthon-3, goormthon-3 등
+> ex. goormthon-4, goormthon-4 등
 
 **frontend.yaml**
 
@@ -58,7 +58,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/frontend:latest #FIXME:
+          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-4/frontend:latest #FIXME:
 ```
 
 **ingress.yaml**
@@ -72,13 +72,13 @@ metadata:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-    - host: goormthon-3.goorm.training #FIXME:
+    - host: goormthon-4.goorm.training #FIXME:
 ```
 
 **kustomization.yaml**
 
 ```yaml
-namespace: goormthon-3 #FIXME:
+namespace: goormthon-4 #FIXME:
 ```
 
 ### 2. 프론트엔드 설정 변경
@@ -118,7 +118,7 @@ spec:
 ConfigMap을 수정한 후에는 Deployment를 재시작하여 변경 사항이 반영되도록 해야 합니다.
 
 ```bash
-kubectl rollout restart deployment frontend-deployment -n goormthon-3
+kubectl rollout restart deployment frontend-deployment -n goormthon-4
 ```
 
 ### Port 매핑
