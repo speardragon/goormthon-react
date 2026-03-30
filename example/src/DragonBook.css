@@ -1,0 +1,72 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.book-scene {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 50% 30%, #1e1408 0%, #0a0a0a 100%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 20px 80px;
+}
+
+.book-page {
+  position: relative;
+  width: min(680px, 95vw);
+  background: #f6edd8;
+  background-image:
+    /* subtle paper grain */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 12px 40px rgba(0, 0, 0, 0.55),
+    inset 0 0 100px rgba(100, 60, 10, 0.07),
+    inset 4px 0 12px rgba(0, 0, 0, 0.06),
+    inset -4px 0 12px rgba(0, 0, 0, 0.06);
+  border-radius: 2px;
+  cursor: none;
+  overflow: visible;
+}
+
+/* Aged page edges */
+.book-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    rgba(80, 40, 0, 0.08) 0%,
+    transparent 6%,
+    transparent 94%,
+    rgba(80, 40, 0, 0.08) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Individual character spans */
+.bc {
+  position: absolute;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  color: #1e1208;
+  line-height: 1;
+  white-space: pre;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.dragon-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 10;
+}
