@@ -18,9 +18,7 @@ const TEXT = `Long ago, in the age before stars had names, there lived a great d
 
 The scholars who dwelt in those stone halls came to love him, for he would curl among the shelves on winter nights, his warm body heating the cold corridors. Sometimes he would read aloud to the sleeping scribes in a voice like rumbling thunder softened by years of speaking in hushed places.
 
-One morning, a young apprentice named Elara found the dragon hunched over a crumbling manuscript, his great claw tracing the letters with surprising delicacy. She asked what he was reading, and without looking up, he said: every story ever told is still being told, somewhere, by someone who has not yet heard how it ends.
-
-She did not understand him then. But she kept those words in a small box in her memory, and years later, when she became the keeper of the library in his stead, she would take them out and turn them over in her mind like smooth river stones, finding new facets each time, wondering if the dragon had known even then that she would one day need them.`;
+One morning, a young apprentice named Elara found the dragon hunched over a crumbling manuscript, his great claw tracing the letters with surprising delicacy. She asked what he was reading, and without looking up, he said: every story ever told is still being told, somewhere, by someone who has not yet heard how it ends.`;
 
 export default function DragonBook() {
   const pageRef = useRef(null);
