@@ -15,7 +15,7 @@ spec:
       containers:
 <<<<<<< Updated upstream
       - name: frontend
-        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-2/frontend:build-5
+        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-1/frontend:build-2
         ports:
         - containerPort: 3000
         volumeMounts:
@@ -24,7 +24,7 @@ spec:
           readOnly: true
 =======
         - name: frontend
-          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-1/frontend:build-4
+          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-1/frontend:build-2
           ports:
             - containerPort: 3000
           volumeMounts:
