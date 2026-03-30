@@ -21,5 +21,5 @@ RUN npm install -g serve
 # 포트 노출
 EXPOSE 3000
 
-# 정적 앱 실행
-CMD ["serve", "-s", "build", "-l", "3000"]
+# 정적 앱 실행 (ConfigMap 마운트 경로 /app/config를 build/config로 심링크)
+CMD ["sh", "-c", "ln -sf /app/config /app/build/config && serve -s build -l 3000"]
