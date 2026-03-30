@@ -13,18 +13,18 @@ spec:
         app: backend
     spec:
       containers:
-      - name: backend
-        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/<goormthon-n>/backend:latest #FIXME: 
-        ports:
-        - containerPort: 8080
-        volumeMounts:
-        - name: config-volume
-          mountPath: /app/config
-          readOnly: true
+        - name: backend
+          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-2/backend:latest #FIXME:
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+              readOnly: true
       volumes:
-      - name: config-volume
-        configMap:
-          name: backend-config
+        - name: config-volume
+          configMap:
+            name: backend-config
 ---
 apiVersion: v1
 kind: Service
@@ -34,5 +34,5 @@ spec:
   selector:
     app: backend
   ports:
-  - port: 80
-    targetPort: 8080
+    - port: 80
+      targetPort: 8080

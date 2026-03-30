@@ -21,6 +21,7 @@ backend/
 <br>
 
 ## 🔧 리소스 구성
+
 ### Deployment & Service
 
 - Deployment: 백엔드 애플리케이션 Pod 관리 (기본 1개 replica)
@@ -33,20 +34,22 @@ backend/
 
 ### Ingress
 
-- 외부 접근: <goormthon-n>.goorm.training/api/* 경로로 백엔드 API 접근 가능
+- 외부 접근: goormthon-2.goorm.training/api/\* 경로로 백엔드 API 접근 가능
 
 - 기본적으로 주석 처리되어 있으며, Client-Side 호출 시에만 활성화
 
 <br>
 
 ## ⚙️ 커스터마이징 방법
+
 ### 1. 구름톤 팀 번호 설정
-다음 파일에서 `<goormthon-n>`를 실제 팀 번호로 변경하세요
+
+다음 파일에서 `goormthon-2`를 실제 팀 번호로 변경하세요
 
 > ex. goormthon-1, goormthon-2 등
 
-
 **backend.yaml**
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -56,11 +59,12 @@ spec:
   template:
     spec:
       containers:
-      - name: backend
-        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/<goormthon-n>/backend:latest #FIXME: 
+        - name: backend
+          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-2/backend:latest #FIXME:
 ```
 
 **ingress.yaml**
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -70,18 +74,21 @@ metadata:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-  - host: <goormthon-n>.goorm.training #FIXME:
+    - host: goormthon-2.goorm.training #FIXME:
 ```
 
 **kustomization.yaml**
+
 ```yaml
-namespace: <goormthon-n> #FIXME:
+namespace: goormthon-2 #FIXME:
 ```
 
 ### 2. 환경 변수 설정
+
 `config/backend-config.json` 파일을 수정하여 필요한 환경 변수를 설정할 수 있습니다.
 
 **예시**
+
 ```json
 {
   "GREETING": "Hello from Backend",
@@ -92,6 +99,7 @@ namespace: <goormthon-n> #FIXME:
 ```
 
 ### 3. Replica 수 조정
+
 `backend.yaml` 파일에서 `replicas:` 값을 원하는 수로 변경하세요.
 
 ```yaml
@@ -106,23 +114,27 @@ spec:
 <br>
 
 ## 📝 주의사항
+
 ### ConfigMap 변경 시
+
 ConfigMap을 수정한 후에는 Deployment를 재시작하여 변경 사항이 반영되도록 해야 합니다.
 
 ```bash
-kubectl rollout restart deployment backend-deployment -n <goormthon-n>
+kubectl rollout restart deployment backend-deployment -n goormthon-2
 ```
 
 ### Ingress 설정
+
 Client-Side 렌더링을 사용하는 경우 kustomization.yaml에서 ingress.yaml을 주석 해제하세요
 
 ```yaml
 resources:
   - backend.yaml
-  - ingress.yaml  # Client-Side 렌더링 시 주석 해제
+  - ingress.yaml # Client-Side 렌더링 시 주석 해제
 ```
 
 ### Port 매핑
+
 - Service 포트: 80 (클러스터 내부 통신용)
 - Container 포트: 8080 (애플리케이션 실제 포트)
 - 백엔드 애플리케이션은 반드시 8080 포트에서 실행되어야 합니다.
@@ -130,6 +142,7 @@ resources:
 <br>
 
 ## 📦 배포 방법
+
 ```bash
 # backend 디렉토리로 이동
 cd k8s/backend
