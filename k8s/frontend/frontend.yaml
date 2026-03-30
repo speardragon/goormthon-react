@@ -15,9 +15,9 @@ spec:
       containers:
         - name: frontend
 <<<<<<< Updated upstream
-          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-1/frontend:build-6
+          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/frontend:build-2
 =======
-          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/frontend:build-4
+          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/frontend:build-2
 >>>>>>> Stashed changes
           ports:
             - containerPort: 3000
