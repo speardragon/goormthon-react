@@ -12,6 +12,11 @@ RUN npm install
 # 전체 앱 소스 복사
 COPY example/ .
 
+# Jenkins credentials에서 주입되는 빌드 타임 환경변수
+# 사용법: docker build --build-arg REACT_APP_TEST_SECRET=<value> .
+ARG REACT_APP_TEST_SECRET
+ENV REACT_APP_TEST_SECRET=$REACT_APP_TEST_SECRET
+
 # 앱 빌드
 RUN npm run build
 
