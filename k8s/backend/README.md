@@ -34,7 +34,7 @@ backend/
 
 ### Ingress
 
-- 외부 접근: goormthon-1.goorm.training/api/\* 경로로 백엔드 API 접근 가능
+- 외부 접근: goormthon-3.goorm.training/api/\* 경로로 백엔드 API 접근 가능
 
 - 기본적으로 주석 처리되어 있으며, Client-Side 호출 시에만 활성화
 
@@ -44,9 +44,9 @@ backend/
 
 ### 1. 구름톤 팀 번호 설정
 
-다음 파일에서 `goormthon-1`를 실제 팀 번호로 변경하세요
+다음 파일에서 `goormthon-3`를 실제 팀 번호로 변경하세요
 
-> ex. goormthon-1, goormthon-1 등
+> ex. goormthon-3, goormthon-3 등
 
 **backend.yaml**
 
@@ -60,7 +60,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-1/backend:latest #FIXME:
+          image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/backend:latest #FIXME:
 ```
 
 **ingress.yaml**
@@ -74,13 +74,13 @@ metadata:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-    - host: goormthon-1.goorm.training #FIXME:
+    - host: goormthon-3.goorm.training #FIXME:
 ```
 
 **kustomization.yaml**
 
 ```yaml
-namespace: goormthon-1 #FIXME:
+namespace: goormthon-3 #FIXME:
 ```
 
 ### 2. 환경 변수 설정
@@ -120,7 +120,7 @@ spec:
 ConfigMap을 수정한 후에는 Deployment를 재시작하여 변경 사항이 반영되도록 해야 합니다.
 
 ```bash
-kubectl rollout restart deployment backend-deployment -n goormthon-1
+kubectl rollout restart deployment backend-deployment -n goormthon-3
 ```
 
 ### Ingress 설정
